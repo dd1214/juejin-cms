@@ -12,7 +12,7 @@ const Settings: ProLayoutProps & {
   colorPrimary: '#1890ff',
   layout: 'mix',
   contentWidth: 'Fluid',
-  fixedHeader: false,
+  fixedHeader: true,
   fixSiderbar: true,
   colorWeak: false,
   title: '掘金 CMS 管理平台',

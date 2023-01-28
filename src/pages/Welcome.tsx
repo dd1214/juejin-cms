@@ -1,20 +1,21 @@
-import { CloudUploadOutlined, SendOutlined } from '@ant-design/icons';
+import {CloudUploadOutlined, SendOutlined} from '@ant-design/icons';
 import {
   DrawerForm,
   PageContainer,
   ProFormSelect,
   ProFormTextArea,
-  ProFormUploadDragger,
+  ProFormUploadDragger
 } from '@ant-design/pro-components';
 import { useModel } from '@umijs/max';
-import { Button, Card, Form, Input, message, Modal, UploadFile, UploadProps } from 'antd';
+import {Button, Card, Form, Input, message, Modal, UploadFile, UploadProps} from 'antd';
 import MarkdownIt from 'markdown-it';
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 
-import { RcFile } from 'antd/es/upload';
 import MdEditor from 'react-markdown-editor-lite';
 import 'react-markdown-editor-lite/lib/index.css';
+import {RcFile} from "antd/es/upload";
 const mdParser = new MarkdownIt(/* Markdown-it options */);
+
 
 function handleEditorChange({ html, text }: { html: string; text: string }) {
   console.log('handleEditorChange', html, text);
@@ -32,7 +33,7 @@ const Welcome: React.FC = () => {
   const onTagFinish = (value: any) => {
     if (value.length > 2) {
       value.pop();
-      message.warning('最多只能选择2个标签');
+      message.warning("最多只能选择2个标签");
     }
   };
 
@@ -153,11 +154,13 @@ const Welcome: React.FC = () => {
             }}
             fieldProps={{
               mode: 'multiple',
-              maxTagCount: 2,
-              onChange: onTagFinish,
+              maxTagCount:2,
+              onChange:onTagFinish
             }}
             placeholder="请添加标签"
-            rules={[{ required: true, message: '请至少添加一个标签', type: 'array' }]}
+            rules={[
+              { required: true, message: '请至少添加一个标签', type: 'array' },
+            ]}
           />
           <ProFormUploadDragger
             name="drag-pic"
@@ -165,11 +168,11 @@ const Welcome: React.FC = () => {
             title="请上传一张封面，多余的图片将会被覆盖"
             description="建议尺寸：1303*734px"
             fieldProps={{
-              listType: 'picture-card',
+              listType:"picture-card",
               fileList: fileList,
-              onPreview: handlePreview,
-              onChange: handleChange,
-              maxCount: 1,
+              onPreview:handlePreview,
+              onChange:handleChange,
+              maxCount:1
             }}
           />
           <Modal open={previewOpen} title={previewTitle} footer={null} onCancel={handleCancel}>
@@ -178,12 +181,14 @@ const Welcome: React.FC = () => {
           <ProFormTextArea
             fieldProps={{
               maxLength: 100,
-              showCount: true,
+              showCount: true
             }}
             name="text"
             label="编辑摘要"
             placeholder="请编辑文章摘要"
-            rules={[{ required: true, message: '请填写文章摘要' }]}
+            rules={[
+              { required: true, message: '请填写文章摘要' },
+            ]}
           />
         </DrawerForm>
       </Card>
