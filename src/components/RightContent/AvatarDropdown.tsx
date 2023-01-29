@@ -1,14 +1,19 @@
-import { LogoutOutlined, SettingOutlined, UserOutlined } from '@ant-design/icons';
+import { userLogoutUsingPOST } from '@/services/swagger/userController';
+import {
+  FileSearchOutlined,
+  LogoutOutlined,
+  SettingOutlined,
+  UserOutlined,
+} from '@ant-design/icons';
+import { setAlpha } from '@ant-design/pro-components';
 import { useEmotionCss } from '@ant-design/use-emotion-css';
 import { history, useModel } from '@umijs/max';
 import { Avatar, Spin } from 'antd';
-import { setAlpha } from '@ant-design/pro-components';
 import { stringify } from 'querystring';
 import type { MenuInfo } from 'rc-menu/lib/interface';
 import React, { useCallback } from 'react';
 import { flushSync } from 'react-dom';
 import HeaderDropdown from '../HeaderDropdown';
-import {userLogoutUsingPOST} from "@/services/swagger/userController";
 
 export type GlobalHeaderRightProps = {
   menu?: boolean;
@@ -51,7 +56,9 @@ const AvatarLogo = () => {
     };
   });
 
-  return <Avatar size="small" className={avatarClassName} src={loginUser?.useravatar} alt="avatar" />;
+  return (
+    <Avatar size="small" className={avatarClassName} src={loginUser?.useravatar} alt="avatar" />
+  );
 };
 
 const AvatarDropdown: React.FC<GlobalHeaderRightProps> = ({ menu }) => {
@@ -146,6 +153,11 @@ const AvatarDropdown: React.FC<GlobalHeaderRightProps> = ({ menu }) => {
           },
         ]
       : []),
+    {
+      key: 'draft',
+      icon: <FileSearchOutlined />,
+      label: '草稿箱',
+    },
     {
       key: 'logout',
       icon: <LogoutOutlined />,

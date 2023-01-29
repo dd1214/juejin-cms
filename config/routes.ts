@@ -30,13 +30,13 @@ export default [
   },
   {
     name: 'list.user-list',
-    icon: 'table',
+    icon: 'userOutlined',
     path: '/list/user',
     component: './UserList',
   },
   {
     name: 'list.article-list',
-    icon: 'table',
+    icon: 'fileWordOutlined',
     path: '/list/article',
     component: './ArticleList',
   },

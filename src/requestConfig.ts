@@ -26,13 +26,11 @@ interface ResponseStructure {
  */
 export const requestConfig: RequestConfig = {
   baseURL: 'http://localhost:8080',
-  withCredentials:true,
-  // 错误处理： umi@3 的错误处理方案。
+  withCredentials: true,
   errorConfig: {
     // 错误抛出
-    errorThrower: (res) => {
-      const { success, data, errorCode, errorMessage, showType } =
-        res as unknown as ResponseStructure;
+    errorThrower: (res: ResponseStructure) => {
+      const { success, data, errorCode, errorMessage, showType } = res;
       if (!success) {
         const error: any = new Error(errorMessage);
         error.name = 'BizError';
@@ -91,7 +89,7 @@ export const requestConfig: RequestConfig = {
   requestInterceptors: [
     (config: RequestOptions) => {
       // 拦截请求配置，进行个性化处理。
-      const url = config?.url?.concat('?token = 123');
+      const url = config?.url?.concat('?token = juejin');
       return { ...config, url };
     },
   ],
@@ -101,9 +99,14 @@ export const requestConfig: RequestConfig = {
     (response) => {
       // 拦截响应数据，进行个性化处理
       const { data } = response as unknown as ResponseStructure;
-
-      if (data?.success === false) {
-        message.error('请求失败！');
+      if (data.code !== 200 && data.code !== 0) {
+        if (data.description) {
+          message.error(data.description);
+        } else if (data.message) {
+          message.error(data.message);
+        } else {
+          message.error('系统异常');
+        }
       }
       return response;
     },

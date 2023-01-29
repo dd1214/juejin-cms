@@ -8,7 +8,7 @@ declare namespace API {
   };
 
   type ArticleVO = {
-    article_id?: string;
+    article_id: string;
     author?: string;
     avatar?: string;
     category?: string;
@@ -17,6 +17,7 @@ declare namespace API {
     content?: string;
     preview?: string;
     snapshot?: string;
+    state?: number;
     title?: string;
     view_count?: number;
   };
