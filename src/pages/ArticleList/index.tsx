@@ -1,109 +1,51 @@
-import { addRule } from '@/services/ant-design-pro/api';
-import { currentListArticleUsingPOST } from '@/services/swagger/articleController';
+import {currentListArticleUsingPOST, deleteArticleUsingPOST} from '@/services/swagger/articleController';
 import ProCard from '@ant-design/pro-card';
 import {
   ActionType,
   FooterToolbar,
-  ModalForm,
   PageContainer,
   ProColumns,
-  ProFormText,
-  ProFormTextArea,
   ProTable,
 } from '@ant-design/pro-components';
-import { FormattedMessage, useIntl } from '@umijs/max';
-import { Avatar, Button, Drawer, message, Space, Tag } from 'antd';
+import { FormattedMessage } from '@umijs/max';
+import {Avatar, Button, Drawer, message, Modal, Space, Tag} from 'antd';
 import MarkdownIt from 'markdown-it';
 import React, { useRef, useState } from 'react';
 import MdEditor from 'react-markdown-editor-lite';
 const mdParser = new MarkdownIt(/* Markdown-it options */);
-/**
- * @en-US Add node
- * @zh-CN 添加节点
- * @param fields
- */
-const handleAdd = async (fields: API.RuleListItem) => {
-  const hide = message.loading('正在添加');
-  try {
-    await addRule({ ...fields });
-    hide();
-    message.success('Added successfully');
-    return true;
-  } catch (error) {
-    hide();
-    message.error('Adding failed, please try again!');
-    return false;
-  }
-};
 
-/**
- * @en-US Update node
- * @zh-CN 更新节点
- *
- * @param fields
- */
-// const handleUpdate = async (fields: FormValueType) => {
-//   const hide = message.loading('Configuring');
-//   try {
-//     await updateRule({
-//       name: fields.name,
-//       desc: fields.desc,
-//       key: fields.key,
-//     });
-//     hide();
-//
-//     message.success('Configuration is successful');
-//     return true;
-//   } catch (error) {
-//     hide();
-//     message.error('Configuration failed, please try again!');
-//     return false;
-//   }
-// };
-
-/**
- *  Delete node
- * @zh-CN 删除节点
- *
- * @param selectedRows
- */
-// const handleRemove = async (selectedRows: API.RuleListItem[]) => {
-//   const hide = message.loading('正在删除');
-//   if (!selectedRows) return true;
-//   try {
-//     await removeRule({
-//       key: selectedRows.map((row) => row.key),
-//     });
-//     hide();
-//     message.success('Deleted successfully and will refresh soon');
-//     return true;
-//   } catch (error) {
-//     hide();
-//     message.error('Delete failed, please try again');
-//     return false;
-//   }
-// };
 
 const TableList: React.FC = () => {
   /**
    * @en-US Pop-up window of new window
    * @zh-CN 新建窗口的弹窗
    *  */
-  const [createModalOpen, handleModalOpen] = useState<boolean>(false);
   const [showDetail, setShowDetail] = useState<boolean>(false);
   const [currentRow, setCurrentRow] = useState<API.ArticleVO>();
-  /**
-   * @en-US The pop-up window of the distribution update window
-   * @zh-CN 分布更新窗口的弹窗
-   * */
   const [selectedRowsState, setSelectedRows] = useState<API.ArticleVO[]>([]);
   const actionRef = useRef<ActionType>();
+  const [articleId,setArticleId] = useState<string>()
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  /**
-   * @en-US International configuration
-   * @zh-CN 国际化配置
-   * */
-  const intl = useIntl();
+  const showModal = (id:string) => {
+    setArticleId(id);
+    setIsModalOpen(true);
+  };
+
+  const handleOk = async () => {
+    const deleteArticle = await deleteArticleUsingPOST({
+      id:articleId
+    })
+    if (deleteArticle){
+      message.success("删除成功！")
+    }
+    setIsModalOpen(false);
+  };
+
+  const handleCancel = () => {
+    setIsModalOpen(false);
+    setArticleId(undefined);
+  };
 
   const columns: ProColumns<API.ArticleVO>[] = [
     {
@@ -209,7 +151,10 @@ const TableList: React.FC = () => {
           查看
         </a>,
         <a key="editable">编辑</a>,
-        <a key="delete" onClick={() => {}}>
+        <a key="delete"
+           onClick={() => {
+            showModal(entity.articleID as string)
+        }}>
           删除
         </a>,
       ],
@@ -267,63 +212,10 @@ const TableList: React.FC = () => {
           </Button>
         </FooterToolbar>
       )}
-
-      <ModalForm
-        title={intl.formatMessage({
-          id: 'pages.searchTable.createForm.newRule',
-          defaultMessage: 'New rule',
-        })}
-        width="400px"
-        open={createModalOpen}
-        onOpenChange={handleModalOpen}
-        onFinish={async (value) => {
-          const success = await handleAdd(value as API.RuleListItem);
-          if (success) {
-            handleModalOpen(false);
-            if (actionRef.current) {
-              actionRef.current.reload();
-            }
-          }
-        }}
-      >
-        <ProFormText
-          rules={[
-            {
-              required: true,
-              message: (
-                <FormattedMessage
-                  id="pages.searchTable.ruleName"
-                  defaultMessage="Rule name is required"
-                />
-              ),
-            },
-          ]}
-          width="md"
-          name="name"
-        />
-        <ProFormTextArea width="md" name="desc" />
-      </ModalForm>
-      {/*<UpdateForm*/}
-      {/*  onSubmit={async (value) => {*/}
-      {/*    const success = await handleUpdate(value);*/}
-      {/*    if (success) {*/}
-      {/*      handleUpdateModalOpen(false);*/}
-      {/*      setCurrentRow(undefined);*/}
-      {/*      if (actionRef.current) {*/}
-      {/*        actionRef.current.reload();*/}
-      {/*      }*/}
-      {/*    }*/}
-      {/*  }}*/}
-      {/*  onCancel={() => {*/}
-      {/*    handleUpdateModalOpen(false);*/}
-      {/*    if (!showDetail) {*/}
-      {/*      setCurrentRow(undefined);*/}
-      {/*    }*/}
-      {/*  }}*/}
-      {/*  updateModalOpen={updateModalOpen}*/}
-      {/*  values={currentRow || {}}*/}
-      {/*/>*/}
-
+      <Modal title="高危操作警告！！！" open={isModalOpen} onOk={handleOk} onCancel={handleCancel}>
+        <p style={{fontSize:16}}>当前正在删除 id 为 {articleId} 的文章，</p>
+        <p style={{fontSize:16 , color:"red"}} >此操作属于高危操作，删除后将无法恢复，请谨慎决定！</p>
+      </Modal>
       <Drawer
         width={800}
         open={showDetail}
@@ -334,9 +226,9 @@ const TableList: React.FC = () => {
         closable={false}
       >
         <ProCard split="vertical">
-          <ProCard title="左侧详情" colSpan="30%">
-            从v但是
-          </ProCard>
+          {/*左边栏   可扩展目录*/}
+          {/*<ProCard title="左侧详情" colSpan="30%">*/}
+          {/*</ProCard>*/}
           <ProCard title={currentRow?.title} headerBordered headStyle={{ color: 'red' }}>
             <div style={{ marginBottom: 20 }}>
               <Avatar size={32} src={currentRow?.avatar} /> &nbsp; {currentRow?.author}{' '}
@@ -344,7 +236,6 @@ const TableList: React.FC = () => {
               <Tag color="success">{currentRow?.category}</Tag>
             </div>
             <MdEditor
-              style={{ maxWidth: 500 }}
               value={currentRow?.content}
               renderHTML={(text) => mdParser.render(text)}
               readOnly={true}
