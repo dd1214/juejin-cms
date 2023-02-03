@@ -1,19 +1,13 @@
 import Footer from '@/components/Footer';
 
-import {
-  LockOutlined,
-  UserOutlined,
-} from '@ant-design/icons';
-import {
-  LoginForm,
-  ProFormText,
-} from '@ant-design/pro-components';
+import { userLoginUsingPOST } from '@/services/swagger/userController';
+import { LockOutlined, UserOutlined } from '@ant-design/icons';
+import { LoginForm, ProFormText } from '@ant-design/pro-components';
 import { useEmotionCss } from '@ant-design/use-emotion-css';
-import { FormattedMessage, history, SelectLang, useIntl, useModel, Helmet } from '@umijs/max';
+import { Helmet, history, SelectLang, useIntl, useModel } from '@umijs/max';
 import { Alert, message, Tabs } from 'antd';
-import Settings from '../../../../config/defaultSettings';
 import React, { useState } from 'react';
-import {userLoginUsingPOST} from "@/services/swagger/userController";
+import Settings from '../../../../config/defaultSettings';
 
 const Lang = () => {
   const langClassName = useEmotionCss(({ token }) => {
@@ -75,13 +69,13 @@ const Login: React.FC = () => {
     try {
       // 登录
       const res = await userLoginUsingPOST({
-        ...values
+        ...values,
       });
       if (res.data) {
         const urlParams = new URL(window.location.href).searchParams;
         history.push(urlParams.get('redirect') || '/');
         setInitialState({
-          loginUser:res.data
+          loginUser: res.data,
         });
         return;
       }
@@ -125,7 +119,6 @@ const Login: React.FC = () => {
           initialValues={{
             autoLogin: true,
           }}
-
           onFinish={async (values) => {
             await handleSubmit(values as API.UserLoginRequest);
           }}
@@ -137,43 +130,28 @@ const Login: React.FC = () => {
             items={[
               {
                 key: 'account',
-                label: intl.formatMessage({
-                  id: 'pages.login.accountLogin.tab',
-                  defaultMessage: '账户密码登录',
-                }),
+                label: '账号密码登录',
               },
             ]}
           />
 
           {status === 'error' && loginType === 'account' && (
-            <LoginMessage
-              content={intl.formatMessage({
-                id: 'pages.login.accountLogin.errorMessage',
-                defaultMessage: '账户或密码错误(admin/ant.design)',
-              })}
-            />
+            <LoginMessage content="账户或密码错误" />
           )}
           {type === 'account' && (
             <>
               <ProFormText
-                name="nickname"
+                name="userAccount"
                 fieldProps={{
                   size: 'large',
                   prefix: <UserOutlined />,
                 }}
-                placeholder={intl.formatMessage({
-                  id: 'pages.login.username.placeholder',
-                  defaultMessage: '用户名: admin or user',
-                })}
+                placeholder="请输入11位账号"
                 rules={[
                   {
                     required: true,
-                    message: (
-                      <FormattedMessage
-                        id="pages.login.username.required"
-                        defaultMessage="请输入用户名!"
-                      />
-                    ),
+                    len: 11,
+                    message: '账号长度必须为11位手机号',
                   },
                 ]}
               />
@@ -183,19 +161,12 @@ const Login: React.FC = () => {
                   size: 'large',
                   prefix: <LockOutlined />,
                 }}
-                placeholder={intl.formatMessage({
-                  id: 'pages.login.password.placeholder',
-                  defaultMessage: '密码: ant.design',
-                })}
+                placeholder="请输入密码"
                 rules={[
                   {
                     required: true,
-                    message: (
-                      <FormattedMessage
-                        id="pages.login.password.required"
-                        defaultMessage="请输入密码！"
-                      />
-                    ),
+                    min: 8,
+                    message: '密码长度为8位以上',
                   },
                 ]}
               />
@@ -206,8 +177,7 @@ const Login: React.FC = () => {
             style={{
               marginBottom: 24,
             }}
-          >
-          </div>
+          ></div>
         </LoginForm>
       </div>
       <Footer />

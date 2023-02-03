@@ -17,27 +17,27 @@ export async function articleAddUsingPOST(
   });
 }
 
-/** currentArticle POST /api/article/current */
-export async function currentArticleUsingPOST(
-  body: API.CurrentArticleRequest,
+/** currentArticle GET /api/article/current */
+export async function currentArticleUsingGET(
+  // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
+  params: API.currentArticleUsingGETParams,
   options?: { [key: string]: any },
 ) {
   return request<API.BaseResponseArticleVO>('/api/article/current', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
+    method: 'GET',
+    params: {
+      ...params,
     },
-    data: body,
     ...(options || {}),
   });
 }
 
 /** currentListArticle POST /api/article/current_list */
 export async function currentListArticleUsingPOST(
-  body: API.CurrentListArticle,
+  body: API.CurrentListArticleRequest,
   options?: { [key: string]: any },
 ) {
-  return request<API.BaseResponseListArticleVO>('/api/article/current_list', {
+  return request<API.BaseResponseCurrentListArticleVO>('/api/article/current_list', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -62,6 +62,14 @@ export async function deleteArticleUsingPOST(
   });
 }
 
+/** getHomeConfig GET /api/article/getHomeConfig */
+export async function getHomeConfigUsingGET(options?: { [key: string]: any }) {
+  return request<API.BaseResponseHome>('/api/article/getHomeConfig', {
+    method: 'GET',
+    ...(options || {}),
+  });
+}
+
 /** importArticle POST /api/article/import */
 export async function importArticleUsingPOST(
   body: API.ImportArticleRequest,
@@ -77,12 +85,54 @@ export async function importArticleUsingPOST(
   });
 }
 
+/** setHomeConfig POST /api/article/setHomeConfig */
+export async function setHomeConfigUsingPOST(
+  body: API.SetHomeConfigRequest,
+  options?: { [key: string]: any },
+) {
+  return request<API.BaseResponseboolean>('/api/article/setHomeConfig', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    data: body,
+    ...(options || {}),
+  });
+}
+
 /** updateArticle POST /api/article/update */
 export async function updateArticleUsingPOST(
   body: API.UpdateArticleRequest,
   options?: { [key: string]: any },
 ) {
   return request<API.BaseResponseboolean>('/api/article/update', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    data: body,
+    ...(options || {}),
+  });
+}
+
+/** updateStatus POST /api/article/updateStatus */
+export async function updateStatusUsingPOST(
+  body: API.UpdateStatusRequest,
+  options?: { [key: string]: any },
+) {
+  return request<API.BaseResponseint>('/api/article/updateStatus', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    data: body,
+    ...(options || {}),
+  });
+}
+
+/** uploadArticleImg POST /api/article/uploadImg */
+export async function uploadArticleImgUsingPOST(body: string, options?: { [key: string]: any }) {
+  return request<API.BaseResponsestring>('/api/article/uploadImg', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

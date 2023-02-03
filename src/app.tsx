@@ -1,37 +1,35 @@
 import Footer from '@/components/Footer';
 import RightContent from '@/components/RightContent';
+import { requestConfig } from '@/requestConfig';
+import { currentUserUsingGET } from '@/services/swagger/userController';
+import { InitialState } from '@/typings';
 import type { Settings as LayoutSettings } from '@ant-design/pro-components';
 import { SettingDrawer } from '@ant-design/pro-components';
 import type { RunTimeLayoutConfig } from '@umijs/max';
 import { history } from '@umijs/max';
 import defaultSettings from '../config/defaultSettings';
-import React from 'react';
-import {requestConfig} from "@/requestConfig";
-import {currentUserUsingGET} from "@/services/swagger/userController";
-import {InitialState} from "@/typings";
 const loginPath = '/user/login';
 
 /**
  * @see  https://umijs.org/zh-CN/plugins/plugin-initial-state
  * */
 export async function getInitialState(): Promise<InitialState> {
-  const state:InitialState = {
-    loginUser:undefined,
-    settings:defaultSettings as Partial<LayoutSettings>
-  }
+  const state: InitialState = {
+    loginUser: undefined,
+    settings: defaultSettings as Partial<LayoutSettings>,
+  };
   //页面首次加载，获取要全局保存的数据
   try {
     const res = await currentUserUsingGET();
-    if (res.data){
+    console.log(res);
+    if (res.data) {
       state.loginUser = res.data;
     }
   } catch (error) {
     history.push(loginPath);
   }
-  return {
-    loginUser:state.loginUser,
-    settings:defaultSettings as Partial<LayoutSettings>
-  };
+
+  return state;
 }
 
 // ProLayout 支持的api https://procomponents.ant.design/components/layout
@@ -44,8 +42,8 @@ export const layout: RunTimeLayoutConfig = ({ initialState, setInitialState }) =
     footerRender: () => <Footer />,
     onPageChange: () => {
       // 如果没有登录，重定向到 login
-      console.log(initialState?.loginUser)
-      if (!initialState?.loginUser) {
+      console.log(initialState?.loginUser);
+      if (!initialState?.loginUser && location.pathname !== loginPath) {
         history.push(loginPath);
       }
     },

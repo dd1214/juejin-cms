@@ -17,7 +17,7 @@ const Settings: ProLayoutProps & {
   colorWeak: false,
   title: '掘金 CMS 管理平台',
   pwa: true,
-  logo: './logo.png',
+  logo: 'http://rpaka2fkv.hb-bkt.clouddn.com/logo.png',
   iconfontUrl: '',
   token: {
     // 参见ts声明，demo 见文档，通过token 修改样式

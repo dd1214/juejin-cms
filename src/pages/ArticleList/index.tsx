@@ -1,7 +1,9 @@
 import { addRule } from '@/services/ant-design-pro/api';
 import { currentListArticleUsingPOST } from '@/services/swagger/articleController';
+import ProCard from '@ant-design/pro-card';
 import {
   ActionType,
+  FooterToolbar,
   ModalForm,
   PageContainer,
   ProColumns,
@@ -10,9 +12,11 @@ import {
   ProTable,
 } from '@ant-design/pro-components';
 import { FormattedMessage, useIntl } from '@umijs/max';
-import { message, Space, Tag } from 'antd';
+import { Avatar, Button, Drawer, message, Space, Tag } from 'antd';
+import MarkdownIt from 'markdown-it';
 import React, { useRef, useState } from 'react';
-
+import MdEditor from 'react-markdown-editor-lite';
+const mdParser = new MarkdownIt(/* Markdown-it options */);
 /**
  * @en-US Add node
  * @zh-CN 添加节点
@@ -86,11 +90,13 @@ const TableList: React.FC = () => {
    * @zh-CN 新建窗口的弹窗
    *  */
   const [createModalOpen, handleModalOpen] = useState<boolean>(false);
+  const [showDetail, setShowDetail] = useState<boolean>(false);
+  const [currentRow, setCurrentRow] = useState<API.ArticleVO>();
   /**
    * @en-US The pop-up window of the distribution update window
    * @zh-CN 分布更新窗口的弹窗
    * */
-
+  const [selectedRowsState, setSelectedRows] = useState<API.ArticleVO[]>([]);
   const actionRef = useRef<ActionType>();
 
   /**
@@ -110,6 +116,13 @@ const TableList: React.FC = () => {
       dataIndex: 'title',
       align: 'center',
       ellipsis: true,
+      render: (dom) => {
+        return (
+          <Space>
+            <a>{dom}</a>
+          </Space>
+        );
+      },
     },
     {
       title: '作者',
@@ -145,7 +158,7 @@ const TableList: React.FC = () => {
     {
       title: '阅读数',
       sorter: true,
-      dataIndex: 'view_count',
+      dataIndex: 'viewCount',
       valueType: 'digit',
       align: 'center',
       hideInSearch: true,
@@ -154,7 +167,7 @@ const TableList: React.FC = () => {
     {
       title: '点赞数',
       sorter: true,
-      dataIndex: 'collect_count',
+      dataIndex: 'collectCount',
       valueType: 'digit',
       align: 'center',
       hideInSearch: true,
@@ -163,7 +176,7 @@ const TableList: React.FC = () => {
     {
       title: '评论数',
       sorter: true,
-      dataIndex: 'comment_count',
+      dataIndex: 'commentCount',
       valueType: 'digit',
       align: 'center',
       hideInSearch: true,
@@ -171,29 +184,31 @@ const TableList: React.FC = () => {
     },
     {
       title: '状态',
-      dataIndex: 'state',
-      width: 80,
+      dataIndex: 'articleStatus',
+      width: 120,
       align: 'center',
       hideInSearch: true,
       valueEnum: {
-        1: { text: '已发布', status: 'Success' },
+        2: { text: '已发布', status: 'Success' },
         0: { text: '草稿箱', status: 'Default' },
-        2: { text: '审核中', status: 'Processing' },
+        1: { text: '审核中', status: 'Processing' },
       },
     },
     {
       title: '操作',
       valueType: 'option',
       key: 'option',
-      render: (text, record, _, action) => [
+      render: (dom, entity) => [
         <a
-          key="editable"
+          key="view"
           onClick={() => {
-            action?.startEditable?.(record.article_id);
+            setCurrentRow(entity);
+            setShowDetail(true);
           }}
         >
-          编辑
+          查看
         </a>,
+        <a key="editable">编辑</a>,
         <a key="delete" onClick={() => {}}>
           删除
         </a>,
@@ -206,23 +221,53 @@ const TableList: React.FC = () => {
       <ProTable<API.ArticleVO>
         headerTitle="文章管理"
         actionRef={actionRef}
-        rowKey="article_id"
+        rowKey="articleID"
         search={{
           labelWidth: 120,
         }}
+        rowSelection={{
+          onChange: (_, selectedRows) => {
+            setSelectedRows(selectedRows);
+          },
+        }}
+        // @ts-ignore
         request={async (params) => {
           const result = await currentListArticleUsingPOST({
-            current: params.current,
-            pageSize: params.pageSize,
+            current: params?.current,
+            pageSize: params?.pageSize,
+            articleStatus: -1,
+            sortField: '',
+            sortOrder: '',
           });
-          return {
-            data: result.data,
-            success: true,
-            total: 200,
-          };
+          if (result.data !== undefined) {
+            return {
+              data: result.data.list,
+              success: true,
+              total: result.data.total,
+            };
+          }
         }}
         columns={columns}
       />
+      {selectedRowsState?.length > 0 && (
+        <FooterToolbar
+          extra={
+            <div>
+              <FormattedMessage id="pages.searchTable.chosen" defaultMessage="Chosen" />{' '}
+              <a style={{ fontWeight: 600 }}>{selectedRowsState.length}</a>{' '}
+              <FormattedMessage id="pages.searchTable.item" defaultMessage="项" />
+            </div>
+          }
+        >
+          <Button type="primary">
+            <FormattedMessage
+              id="pages.searchTable.batchApproval"
+              defaultMessage="Batch approval"
+            />
+          </Button>
+        </FooterToolbar>
+      )}
+
       <ModalForm
         title={intl.formatMessage({
           id: 'pages.searchTable.createForm.newRule',
@@ -279,29 +324,43 @@ const TableList: React.FC = () => {
       {/*  values={currentRow || {}}*/}
       {/*/>*/}
 
-      {/*<Drawer*/}
-      {/*  width={600}*/}
-      {/*  open={showDetail}*/}
-      {/*  onClose={() => {*/}
-      {/*    setCurrentRow(undefined);*/}
-      {/*    setShowDetail(false);*/}
-      {/*  }}*/}
-      {/*  closable={false}*/}
-      {/*>*/}
-      {/*  {currentRow?.name && (*/}
-      {/*    <ProDescriptions<API.RuleListItem>*/}
-      {/*      column={2}*/}
-      {/*      title={currentRow?.name}*/}
-      {/*      request={async () => ({*/}
-      {/*        data: currentRow || {},*/}
-      {/*      })}*/}
-      {/*      params={{*/}
-      {/*        id: currentRow?.name,*/}
-      {/*      }}*/}
-      {/*      columns={columns as ProDescriptionsItemProps<API.RuleListItem>[]}*/}
-      {/*    />*/}
-      {/*  )}*/}
-      {/*</Drawer>*/}
+      <Drawer
+        width={800}
+        open={showDetail}
+        onClose={() => {
+          setCurrentRow(undefined);
+          setShowDetail(false);
+        }}
+        closable={false}
+      >
+        <ProCard split="vertical">
+          <ProCard title="左侧详情" colSpan="30%">
+            从v但是
+          </ProCard>
+          <ProCard title={currentRow?.title} headerBordered headStyle={{ color: 'red' }}>
+            <div style={{ marginBottom: 20 }}>
+              <Avatar size={32} src={currentRow?.avatar} /> &nbsp; {currentRow?.author}{' '}
+              &nbsp;&nbsp;&nbsp;
+              <Tag color="success">{currentRow?.category}</Tag>
+            </div>
+            <MdEditor
+              style={{ maxWidth: 500 }}
+              value={currentRow?.content}
+              renderHTML={(text) => mdParser.render(text)}
+              readOnly={true}
+              view={{ menu: false, md: false, html: true }}
+              canView={{
+                menu: false,
+                md: false,
+                html: true,
+                both: true,
+                fullScreen: false,
+                hideMenu: false,
+              }}
+            />
+          </ProCard>
+        </ProCard>
+      </Drawer>
     </PageContainer>
   );
 };

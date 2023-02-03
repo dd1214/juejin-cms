@@ -1,25 +1,37 @@
 declare namespace API {
+  type AdvertisementVO = {
+    imgUrl?: string;
+    open?: boolean;
+    url?: string;
+  };
+
   type ArticleAddRequest = {
     category?: string;
     content?: string;
+    label?: string;
     preview?: string;
-    snapshoot?: string;
+    snapshot?: string;
     title?: string;
   };
 
   type ArticleVO = {
-    article_id: string;
+    articleID?: string;
+    articleStatus?: number;
     author?: string;
     avatar?: string;
     category?: string;
-    collect_count?: number;
-    comment_count?: number;
+    collectCount?: number;
+    commentCount?: number;
     content?: string;
+    currentTime?: string;
     preview?: string;
     snapshot?: string;
-    state?: number;
     title?: string;
-    view_count?: number;
+    viewCount?: number;
+  };
+
+  type AuditArticleVO = {
+    id?: string;
   };
 
   type BaseResponseArticleVO = {
@@ -36,16 +48,30 @@ declare namespace API {
     message?: string;
   };
 
-  type BaseResponseint = {
+  type BaseResponseCurrentListArticleVO = {
     code?: number;
-    data?: number;
+    data?: CurrentListArticleVO;
     description?: string;
     message?: string;
   };
 
-  type BaseResponseListArticleVO = {
+  type BaseResponseCurrentListUserVO = {
     code?: number;
-    data?: ArticleVO[];
+    data?: CurrentListUserVO;
+    description?: string;
+    message?: string;
+  };
+
+  type BaseResponseHome = {
+    code?: number;
+    data?: Home;
+    description?: string;
+    message?: string;
+  };
+
+  type BaseResponseint = {
+    code?: number;
+    data?: number;
     description?: string;
     message?: string;
   };
@@ -64,24 +90,104 @@ declare namespace API {
     message?: string;
   };
 
-  type CurrentArticleRequest = {
+  type currentArticleUsingGETParams = {
+    /** id */
     id?: string;
   };
 
-  type CurrentListArticle = {
+  type CurrentListArticleRequest = {
+    articleStatus?: number;
     category?: string;
+    content?: string;
+    current?: number;
+    label?: string;
+    pageSize?: number;
+    sortField?: string;
+    sortOrder?: string;
+  };
+
+  type CurrentListArticleVO = {
+    list?: ArticleVO[];
+    total?: number;
+  };
+
+  type CurrentListUserRequest = {
+    content?: string;
     current?: number;
     pageSize?: number;
     sortField?: string;
     sortOrder?: string;
+    userAccount?: string;
+  };
+
+  type CurrentListUserVO = {
+    list?: UserVO[];
+    total?: number;
+  };
+
+  type currentUserByIdUsingGETParams = {
+    /** id */
+    id?: string;
   };
 
   type DeleteArticleRequest = {
     id?: string;
   };
 
+  type deleteUserUsingGETParams = {
+    /** id */
+    id?: string;
+  };
+
+  type Home = {
+    advertisement?: AdvertisementVO[];
+    labelList?: HomeLabelListVO[];
+    screening?: ScreeningListVO[];
+    titleList?: HomeTitleListVO[];
+    userList?: HomeUserListVO[];
+  };
+
+  type HomeLabelListVO = {
+    badge?: string;
+    parameter?: string;
+    sublist?: HomeSubListVO[];
+    text?: string;
+  };
+
+  type HomeSubListVO = {
+    parameter?: string;
+    text?: string;
+  };
+
+  type HomeTitleListVO = {
+    badge?: string;
+    image?: boolean;
+    imgUrl?: string;
+    title?: string;
+    url?: string;
+  };
+
+  type HomeUserListVO = {
+    list?: UserListVO[];
+    title?: string;
+  };
+
   type ImportArticleRequest = {
-    content?: ArticleVO[];
+    content?: ImportArticleVO[];
+  };
+
+  type ImportArticleVO = {
+    articleID?: string;
+    author?: string;
+    avatar?: string;
+    category?: string;
+    collectCount?: number;
+    commentCount?: number;
+    content?: string;
+    preview?: string;
+    snapshot?: string;
+    title?: string;
+    viewCount?: number;
   };
 
   type ModelAndView = {
@@ -162,29 +268,72 @@ declare namespace API {
     viewName?: string;
   };
 
+  type ScreeningListVO = {
+    parameter?: string;
+    text?: string;
+  };
+
+  type SetHomeConfigRequest = {
+    homeConfig?: Home;
+  };
+
   type UpdateArticleRequest = {
-    content?: ArticleVO;
+    content?: UpdateArticleVO;
+    id?: string;
+  };
+
+  type UpdateArticleVO = {
+    category?: string;
+    content?: string;
+    preview?: string;
+    snapshot?: string;
+    title?: string;
+  };
+
+  type UpdateStatusRequest = {
+    content?: AuditArticleVO[];
+  };
+
+  type UpdateUserRequest = {
+    content?: UpdateUserVO;
+    id?: string;
+  };
+
+  type UpdateUserVO = {
+    avatar?: string;
+    introduction?: string;
+    nickname?: string;
+  };
+
+  type UserListVO = {
+    avatar?: string;
+    creationLevel?: string;
+    introduction?: string;
+    nickname?: string;
+    userId?: string;
   };
 
   type UserLoginRequest = {
-    nickname?: string;
+    userAccount?: string;
     userPassword?: string;
   };
 
   type UserRegisterRequest = {
     introduction?: string;
     nickname?: string;
+    userAccount?: string;
     userAvatar?: string;
     userPassword?: string;
   };
 
   type UserVO = {
+    avatar?: string;
+    collectCount?: number;
+    currentTime?: string;
     introduction?: string;
-    likesnumber?: number;
     nickname?: string;
-    readingquantity?: number;
-    useravatar?: string;
     userid?: string;
+    viewCount?: number;
   };
 
   type View = {
