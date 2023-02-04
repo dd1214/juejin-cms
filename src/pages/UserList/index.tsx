@@ -1,142 +1,143 @@
-import { PlusOutlined } from '@ant-design/icons';
-import type { ActionType, ProColumns, ProDescriptionsItemProps } from '@ant-design/pro-components';
+import { currentUserListUsingPOST, deleteUserUsingGET } from '@/services/swagger/userController';
+import { EyeOutlined, LikeOutlined } from '@ant-design/icons';
 import {
+  ActionType,
+  DrawerForm,
   PageContainer,
-  ProDescriptions,
+  ProColumns,
+  ProForm,
+  ProFormSelect,
   ProTable,
 } from '@ant-design/pro-components';
-import { FormattedMessage, useIntl } from '@umijs/max';
-import { Button, Drawer, Input } from 'antd';
+import { ProFormDateRangePicker } from '@ant-design/pro-form';
+import { ProFormText } from '@ant-design/pro-form/lib';
+import { Avatar, Card, message, Modal } from 'antd';
 import React, { useRef, useState } from 'react';
-import {currentUserListUsingPOST} from "@/services/swagger/userController";
-
 
 const TableList: React.FC = () => {
-  /**
-   * @en-US Pop-up window of new window
-   * @zh-CN 新建窗口的弹窗
-   *  */
-  const [createModalOpen, handleModalOpen] = useState<boolean>(false);
-  /**
-   * @en-US The pop-up window of the distribution update window
-   * @zh-CN 分布更新窗口的弹窗
-   * */
-  const [updateModalOpen, handleUpdateModalOpen] = useState<boolean>(false);
-
+  const { Meta } = Card;
   const [showDetail, setShowDetail] = useState<boolean>(false);
-
   const actionRef = useRef<ActionType>();
-  const [currentRow, setCurrentRow] = useState<API.RuleListItem>();
-  const [selectedRowsState, setSelectedRows] = useState<API.RuleListItem[]>([]);
+  const [currentRow, setCurrentRow] = useState<API.UserVO>();
+  const [userId, setUserId] = useState<string>();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isUserOpen, setIsUserOpen] = useState(false);
 
-  /**
-   * @en-US International configuration
-   * @zh-CN 国际化配置
-   * */
-  const intl = useIntl();
+  const showModal = (id: string) => {
+    setUserId(id);
+    setIsModalOpen(true);
+  };
 
-  const columns: ProColumns<API.UserListVO>[] = [
+  const handleOk = async () => {
+    const deleteArticle = await deleteUserUsingGET({
+      id: userId,
+    });
+    if (deleteArticle) {
+      message.success('删除成功！');
+    }
+    setIsModalOpen(false);
+  };
+
+  const handleCancel = () => {
+    setIsModalOpen(false);
+    setUserId(undefined);
+  };
+
+  const columns: ProColumns<API.UserVO>[] = [
     {
-      title: "账号",
+      dataIndex: 'index',
+      valueType: 'indexBorder',
+      width: 48,
+      align: 'center',
+    },
+    {
+      title: '账号',
       dataIndex: 'userAccount',
       valueType: 'text',
-
+      align: 'center',
     },
     {
-      title: "昵称",
+      title: '头像',
+      dataIndex: 'avatar',
+      valueType: 'image',
+      align: 'center',
+      hideInSearch: true,
+    },
+    {
+      title: '昵称',
       dataIndex: 'nickname',
       valueType: 'text',
-    },
-    {
-      title: "头像",
-      dataIndex: 'avatar',
-      valueType:'image'
-    },
-    {
-      title: <FormattedMessage id="pages.searchTable.titleStatus" defaultMessage="Status" />,
-      dataIndex: 'status',
-      hideInForm: true,
-      valueEnum: {
-        0: {
-          text: (
-            <FormattedMessage
-              id="pages.searchTable.nameStatus.default"
-              defaultMessage="Shut down"
-            />
-          ),
-          status: 'Default',
-        },
-        1: {
-          text: (
-            <FormattedMessage id="pages.searchTable.nameStatus.running" defaultMessage="Running" />
-          ),
-          status: 'Processing',
-        },
-        2: {
-          text: (
-            <FormattedMessage id="pages.searchTable.nameStatus.online" defaultMessage="Online" />
-          ),
-          status: 'Success',
-        },
-        3: {
-          text: (
-            <FormattedMessage
-              id="pages.searchTable.nameStatus.abnormal"
-              defaultMessage="Abnormal"
-            />
-          ),
-          status: 'Error',
-        },
-      },
-    },
-    {
-      title: (
-        <FormattedMessage
-          id="pages.searchTable.titleUpdatedAt"
-          defaultMessage="Last scheduled time"
-        />
-      ),
-      sorter: true,
-      dataIndex: 'updatedAt',
-      valueType: 'dateTime',
-      renderFormItem: (item, { defaultRender, ...rest }, form) => {
-        const status = form.getFieldValue('status');
-        if (`${status}` === '0') {
-          return false;
-        }
-        if (`${status}` === '3') {
-          return (
-            <Input
-              {...rest}
-              placeholder={intl.formatMessage({
-                id: 'pages.searchTable.exception',
-                defaultMessage: 'Please enter the reason for the exception!',
-              })}
-            />
-          );
-        }
-        return defaultRender(item);
-      },
-    },
-    {
-      title: <FormattedMessage id="pages.searchTable.titleOption" defaultMessage="Operating" />,
-      dataIndex: 'option',
-      valueType: 'option',
-      render: (_, record) => [
+      align: 'center',
+      render: (dom, entity) => (
         <a
-          key="config"
           onClick={() => {
-            handleUpdateModalOpen(true);
-            setCurrentRow(record);
+            setIsUserOpen(true);
+            setCurrentRow(entity);
           }}
         >
-          <FormattedMessage id="pages.searchTable.config" defaultMessage="Configuration" />
+          {dom}
+        </a>
+      ),
+    },
+    {
+      title: '简介',
+      dataIndex: 'introduction',
+      ellipsis: true,
+      valueType: 'text',
+      width: 150,
+      align: 'center',
+    },
+    {
+      title: '阅读量',
+      dataIndex: 'viewCount',
+      valueType: 'digit',
+      align: 'center',
+      hideInSearch: true,
+    },
+    {
+      title: '点赞数',
+      dataIndex: 'collectCount',
+      valueType: 'digit',
+      align: 'center',
+      hideInSearch: true,
+    },
+    {
+      title: '状态',
+      dataIndex: 'userStatus',
+      align: 'center',
+      valueEnum: {
+        0: { text: '正常', status: 'Success' },
+        1: { text: '冻结', status: 'Processing' },
+      },
+    },
+    {
+      title: '创建时间',
+      dataIndex: 'currentTime',
+      valueType: 'dateTime',
+      align: 'center',
+      width: 150,
+      hideInSearch: true,
+    },
+    {
+      title: '操作',
+      valueType: 'option',
+      key: 'option',
+      render: (dom, entity) => [
+        <a
+          key="editable"
+          onClick={() => {
+            setShowDetail(true);
+          }}
+        >
+          编辑
         </a>,
-        <a key="subscribeAlert" href="https://procomponents.ant.design/">
-          <FormattedMessage
-            id="pages.searchTable.subscribeAlert"
-            defaultMessage="Subscribe to alerts"
-          />
+        <a
+          key="delete"
+          onClick={() => {
+            showModal(entity.userid as string);
+          }}
+        >
+          删除
         </a>,
       ],
     },
@@ -144,27 +145,12 @@ const TableList: React.FC = () => {
 
   return (
     <PageContainer>
-      <ProTable<API.UserListVO>
-        headerTitle={intl.formatMessage({
-          id: 'pages.searchTable.title',
-          defaultMessage: 'Enquiry form',
-        })}
+      <ProTable<API.UserVO>
         actionRef={actionRef}
-        rowKey="key"
+        rowKey="userid"
         search={{
           labelWidth: 120,
         }}
-        toolBarRender={() => [
-          <Button
-            type="primary"
-            key="primary"
-            onClick={() => {
-              handleModalOpen(true);
-            }}
-          >
-            <PlusOutlined /> <FormattedMessage id="pages.searchTable.new" defaultMessage="New" />
-          </Button>,
-        ]}
         // @ts-ignore
         request={async (params) => {
           const result = await currentUserListUsingPOST({
@@ -182,37 +168,116 @@ const TableList: React.FC = () => {
           }
         }}
         columns={columns}
-        rowSelection={{
-          onChange: (_, selectedRows) => {
-            setSelectedRows(selectedRows);
-          },
-        }}
       />
-
-
-      <Drawer
+      <Modal title="高危操作警告！！！" open={isModalOpen} onOk={handleOk} onCancel={handleCancel}>
+        <p style={{ fontSize: 16 }}>当前正在删除 id 为 {userId} 的用户，</p>
+        <p style={{ fontSize: 16, color: 'red' }}>
+          此操作属于高危操作，删除后将无法恢复，请谨慎决定！
+        </p>
+      </Modal>
+      <DrawerForm<{
+        name: string;
+        company: string;
+      }>
         width={600}
         open={showDetail}
-        onClose={() => {
-          setCurrentRow(undefined);
-          setShowDetail(false);
+        onOpenChange={setShowDetail}
+        title="修改用户信息"
+        autoFocusFirstInput
+        drawerProps={{
+          destroyOnClose: true,
         }}
-        closable={false}
+        onFinish={async (values) => {
+          console.log(values.name);
+          message.success('提交成功');
+          // 不返回不会关闭弹框
+          return true;
+        }}
       >
-        {currentRow?.name && (
-          <ProDescriptions<API.RuleListItem>
-            column={2}
-            title={currentRow?.name}
-            request={async () => ({
-              data: currentRow || {},
-            })}
-            params={{
-              id: currentRow?.name,
-            }}
-            columns={columns as ProDescriptionsItemProps<API.RuleListItem>[]}
+        <ProForm.Group>
+          <ProFormText
+            name="name"
+            width="md"
+            label="签约客户名称"
+            tooltip="最长为 24 位"
+            placeholder="请输入名称"
           />
-        )}
-      </Drawer>
+          <ProFormText
+            rules={[
+              {
+                required: true,
+              },
+            ]}
+            width="md"
+            name="company"
+            label="我方公司名称"
+            placeholder="请输入名称"
+          />
+        </ProForm.Group>
+        <ProForm.Group>
+          <ProFormText width="md" name="contract" label="合同名称" placeholder="请输入名称" />
+          <ProFormDateRangePicker name="contractTime" label="合同生效时间" />
+        </ProForm.Group>
+        <ProForm.Group>
+          <ProFormSelect
+            options={[
+              {
+                value: 'chapter',
+                label: '盖章后生效',
+              },
+            ]}
+            width="xs"
+            name="useMode"
+            label="合同约定生效方式"
+          />
+          <ProFormSelect
+            width="xs"
+            options={[
+              {
+                value: 'time',
+                label: '履行完终止',
+              },
+            ]}
+            formItemProps={{
+              style: {
+                margin: 0,
+              },
+            }}
+            name="unusedMode"
+            label="合同约定失效效方式"
+          />
+        </ProForm.Group>
+      </DrawerForm>
+
+      <Modal
+        title={currentRow?.nickname + '的用户卡片'}
+        open={isUserOpen}
+        onOk={() => {
+          setIsUserOpen(false);
+        }}
+        onCancel={() => {
+          setIsUserOpen(false);
+        }}
+      >
+        <Card
+          actions={[
+            <span key="viewCount">
+              {' '}
+              <EyeOutlined /> {currentRow?.viewCount}
+            </span>,
+            <span key="collectCount">
+              {' '}
+              <LikeOutlined /> {currentRow?.collectCount}
+            </span>,
+          ]}
+        >
+          <Meta
+            avatar={<Avatar src={currentRow?.avatar} />}
+            title={currentRow?.nickname}
+            description={currentRow?.introduction}
+          />
+        </Card>
+      </Modal>
     </PageContainer>
   );
 };
