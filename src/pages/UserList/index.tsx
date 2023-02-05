@@ -4,19 +4,18 @@ import {
   ActionType,
   DrawerForm,
   PageContainer,
-  ProColumns,
-  ProForm,
-  ProFormSelect,
+  ProColumns, ProFormSelect,
   ProTable,
 } from '@ant-design/pro-components';
-import { ProFormDateRangePicker } from '@ant-design/pro-form';
 import { ProFormText } from '@ant-design/pro-form/lib';
 import { Avatar, Card, message, Modal } from 'antd';
 import React, { useRef, useState } from 'react';
+import {ProFormUploadDragger} from "@ant-design/pro-form";
 
 const TableList: React.FC = () => {
   const { Meta } = Card;
   const [showDetail, setShowDetail] = useState<boolean>(false);
+  const [userRow, setUserRow] = useState<API.UserVO>();
   const actionRef = useRef<ActionType>();
   const [currentRow, setCurrentRow] = useState<API.UserVO>();
   const [userId, setUserId] = useState<string>();
@@ -127,6 +126,7 @@ const TableList: React.FC = () => {
           key="editable"
           onClick={() => {
             setShowDetail(true);
+            setUserRow(entity);
           }}
         >
           编辑
@@ -190,63 +190,49 @@ const TableList: React.FC = () => {
         onFinish={async (values) => {
           console.log(values.name);
           message.success('提交成功');
-          // 不返回不会关闭弹框
           return true;
         }}
       >
-        <ProForm.Group>
-          <ProFormText
-            name="name"
-            width="md"
-            label="签约客户名称"
-            tooltip="最长为 24 位"
-            placeholder="请输入名称"
-          />
-          <ProFormText
-            rules={[
-              {
-                required: true,
-              },
-            ]}
-            width="md"
-            name="company"
-            label="我方公司名称"
-            placeholder="请输入名称"
-          />
-        </ProForm.Group>
-        <ProForm.Group>
-          <ProFormText width="md" name="contract" label="合同名称" placeholder="请输入名称" />
-          <ProFormDateRangePicker name="contractTime" label="合同生效时间" />
-        </ProForm.Group>
-        <ProForm.Group>
-          <ProFormSelect
-            options={[
-              {
-                value: 'chapter',
-                label: '盖章后生效',
-              },
-            ]}
-            width="xs"
-            name="useMode"
-            label="合同约定生效方式"
-          />
-          <ProFormSelect
-            width="xs"
-            options={[
-              {
-                value: 'time',
-                label: '履行完终止',
-              },
-            ]}
-            formItemProps={{
-              style: {
-                margin: 0,
-              },
-            }}
-            name="unusedMode"
-            label="合同约定失效效方式"
-          />
-        </ProForm.Group>
+        <ProFormText
+          name="nickname"
+          label="昵称"
+          placeholder="请输入昵称"
+          rules={[
+            {
+              required: true,
+            },
+          ]}
+        />
+
+        <ProFormText
+          name="introduction"
+          label="简介"
+          placeholder="请输入简介"
+          rules={[
+            {
+              required: true,
+            },
+          ]}
+        />
+        <ProFormUploadDragger
+          label="头像"
+          name="avatar"
+          rules={[
+            {
+              required: true,
+            },
+          ]}
+        />
+        <ProFormSelect
+          name="userStatus"
+          label="状态"
+          valueEnum={{
+            0: '正常',
+            1: '冻结',
+          }}
+          placeholder="请选择用户状态"
+          rules={[{ required: true}]}
+        />
       </DrawerForm>
 
       <Modal

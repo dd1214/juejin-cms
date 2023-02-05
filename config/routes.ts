@@ -41,6 +41,12 @@ export default [
     component: './ArticleList',
   },
   {
+    name: '全局概览',
+    icon: 'dotChartOutlined',
+    path: '/global',
+    component: './GlobalOverview',
+  },
+  {
     path: '/',
     redirect: '/welcome',
   },
