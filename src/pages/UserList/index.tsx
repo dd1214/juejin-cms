@@ -6,11 +6,12 @@ import {
   PageContainer,
   ProColumns, ProFormSelect,
   ProTable,
+  ProForm,
 } from '@ant-design/pro-components';
 import { ProFormText } from '@ant-design/pro-form/lib';
-import { Avatar, Card, message, Modal } from 'antd';
+import { Avatar, Card, message, Modal, Form } from 'antd';
 import React, { useRef, useState } from 'react';
-import {ProFormUploadDragger} from "@ant-design/pro-form";
+import { ProFormUploadDragger } from "@ant-design/pro-form";
 
 const TableList: React.FC = () => {
   const { Meta } = Card;
@@ -41,6 +42,11 @@ const TableList: React.FC = () => {
     setIsModalOpen(false);
     setUserId(undefined);
   };
+  const userDetail = (data: any) => {
+    console.log(data)
+    setUserRow(data);
+    return data;
+  }
 
   const columns: ProColumns<API.UserVO>[] = [
     {
@@ -126,6 +132,7 @@ const TableList: React.FC = () => {
           key="editable"
           onClick={() => {
             setShowDetail(true);
+            userDetail(entity)
             setUserRow(entity);
           }}
         >
@@ -193,46 +200,48 @@ const TableList: React.FC = () => {
           return true;
         }}
       >
-        <ProFormText
-          name="nickname"
-          label="昵称"
-          placeholder="请输入昵称"
-          rules={[
-            {
-              required: true,
-            },
-          ]}
-        />
+        <ProForm initialValues={userDetail}>
+          <ProFormText
+            name="nickname"
+            label="昵称"
+            placeholder="请输入昵称"
+            rules={[
+              {
+                required: true,
+              },
+            ]}
+          />
 
-        <ProFormText
-          name="introduction"
-          label="简介"
-          placeholder="请输入简介"
-          rules={[
-            {
-              required: true,
-            },
-          ]}
-        />
-        <ProFormUploadDragger
-          label="头像"
-          name="avatar"
-          rules={[
-            {
-              required: true,
-            },
-          ]}
-        />
-        <ProFormSelect
-          name="userStatus"
-          label="状态"
-          valueEnum={{
-            0: '正常',
-            1: '冻结',
-          }}
-          placeholder="请选择用户状态"
-          rules={[{ required: true}]}
-        />
+          <ProFormText
+            name="introduction"
+            label="简介"
+            placeholder="请输入简介"
+            rules={[
+              {
+                required: true,
+              },
+            ]}
+          />
+          <ProFormUploadDragger
+            label="头像"
+            name="avatar"
+            rules={[
+              {
+                required: true,
+              },
+            ]}
+          />
+          <ProFormSelect
+            name="userStatus"
+            label="状态"
+            valueEnum={{
+              0: '正常',
+              1: '冻结',
+            }}
+            placeholder="请选择用户状态"
+            rules={[{ required: true }]}
+          />
+        </ProForm>
       </DrawerForm>
 
       <Modal
