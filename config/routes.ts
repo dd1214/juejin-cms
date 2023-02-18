@@ -29,27 +29,22 @@ export default [
     component: './Welcome',
   },
   {
-    path: '/admin',
-    name: 'admin',
-    icon: 'crown',
-    access: 'canAdmin',
-    routes: [
-      {
-        path: '/admin',
-        redirect: '/admin/sub-page',
-      },
-      {
-        path: '/admin/sub-page',
-        name: 'sub-page',
-        component: './Admin',
-      },
-    ],
+    name: 'list.user-list',
+    icon: 'userOutlined',
+    path: '/list/user',
+    component: './UserList',
   },
   {
-    name: 'list.table-list',
-    icon: 'table',
-    path: '/list',
-    component: './TableList',
+    name: 'list.article-list',
+    icon: 'fileWordOutlined',
+    path: '/list/article',
+    component: './ArticleList',
+  },
+  {
+    name: '全局概览',
+    icon: 'dotChartOutlined',
+    path: '/global',
+    component: './GlobalOverview',
   },
   {
     path: '/',

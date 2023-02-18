@@ -1,9 +1,14 @@
-import { outLogin } from '@/services/ant-design-pro/api';
-import { LogoutOutlined, SettingOutlined, UserOutlined } from '@ant-design/icons';
+import { userLogoutUsingPOST } from '@/services/swagger/userController';
+import {
+  FileSearchOutlined,
+  LogoutOutlined,
+  SettingOutlined,
+  UserOutlined,
+} from '@ant-design/icons';
+import { setAlpha } from '@ant-design/pro-components';
 import { useEmotionCss } from '@ant-design/use-emotion-css';
 import { history, useModel } from '@umijs/max';
 import { Avatar, Spin } from 'antd';
-import { setAlpha } from '@ant-design/pro-components';
 import { stringify } from 'querystring';
 import type { MenuInfo } from 'rc-menu/lib/interface';
 import React, { useCallback } from 'react';
@@ -16,7 +21,7 @@ export type GlobalHeaderRightProps = {
 
 const Name = () => {
   const { initialState } = useModel('@@initialState');
-  const { currentUser } = initialState || {};
+  const { loginUser } = initialState || {};
 
   const nameClassName = useEmotionCss(({ token }) => {
     return {
@@ -32,12 +37,12 @@ const Name = () => {
     };
   });
 
-  return <span className={`${nameClassName} anticon`}>{currentUser?.name}</span>;
+  return <span className={`${nameClassName} anticon`}>{loginUser?.nickname}</span>;
 };
 
 const AvatarLogo = () => {
   const { initialState } = useModel('@@initialState');
-  const { currentUser } = initialState || {};
+  const { loginUser } = initialState || {};
 
   const avatarClassName = useEmotionCss(({ token }) => {
     return {
@@ -51,7 +56,9 @@ const AvatarLogo = () => {
     };
   });
 
-  return <Avatar size="small" className={avatarClassName} src={currentUser?.avatar} alt="avatar" />;
+  return (
+    <Avatar size="small" className={avatarClassName} src={loginUser?.useravatar} alt="avatar" />
+  );
 };
 
 const AvatarDropdown: React.FC<GlobalHeaderRightProps> = ({ menu }) => {
@@ -59,7 +66,7 @@ const AvatarDropdown: React.FC<GlobalHeaderRightProps> = ({ menu }) => {
    * 退出登录，并且将当前的 url 保存
    */
   const loginOut = async () => {
-    await outLogin();
+    await userLogoutUsingPOST();
     const { search, pathname } = window.location;
     const urlParams = new URL(window.location.href).searchParams;
     /** 此方法会跳转到 redirect 参数所在的位置 */
@@ -122,9 +129,9 @@ const AvatarDropdown: React.FC<GlobalHeaderRightProps> = ({ menu }) => {
     return loading;
   }
 
-  const { currentUser } = initialState;
+  const { loginUser } = initialState;
 
-  if (!currentUser || !currentUser.name) {
+  if (!loginUser || !loginUser.nickname) {
     return loading;
   }
 
@@ -146,6 +153,11 @@ const AvatarDropdown: React.FC<GlobalHeaderRightProps> = ({ menu }) => {
           },
         ]
       : []),
+    {
+      key: 'draft',
+      icon: <FileSearchOutlined />,
+      label: '草稿箱',
+    },
     {
       key: 'logout',
       icon: <LogoutOutlined />,

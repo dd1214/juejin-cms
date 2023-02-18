@@ -1,91 +1,65 @@
-import { PageContainer } from '@ant-design/pro-components';
+import {CloudUploadOutlined, SendOutlined} from '@ant-design/icons';
+import {
+  DrawerForm,
+  PageContainer,
+  ProFormSelect,
+  ProFormTextArea,
+  ProFormUploadDragger
+} from '@ant-design/pro-components';
 import { useModel } from '@umijs/max';
-import { Card, theme } from 'antd';
-import React from 'react';
+import {Button, Card, Form, Input, message, Modal, UploadFile, UploadProps} from 'antd';
+import MarkdownIt from 'markdown-it';
+import React, {useState} from 'react';
 
-/**
- * 每个单独的卡片，为了复用样式抽成了组件
- * @param param0
- * @returns
- */
-const InfoCard: React.FC<{
-  title: string;
-  index: number;
-  desc: string;
-  href: string;
-}> = ({ title, href, index, desc }) => {
-  const { useToken } = theme;
+import MdEditor from 'react-markdown-editor-lite';
+import 'react-markdown-editor-lite/lib/index.css';
+import {RcFile} from "antd/es/upload";
+const mdParser = new MarkdownIt(/* Markdown-it options */);
 
-  const { token } = useToken();
 
-  return (
-    <div
-      style={{
-        backgroundColor: token.colorBgContainer,
-        boxShadow: token.boxShadow,
-        borderRadius: '8px',
-        fontSize: '14px',
-        color: token.colorTextSecondary,
-        lineHeight: '22px',
-        padding: '16px 19px',
-        minWidth: '220px',
-        flex: 1,
-      }}
-    >
-      <div
-        style={{
-          display: 'flex',
-          gap: '4px',
-          alignItems: 'center',
-        }}
-      >
-        <div
-          style={{
-            width: 48,
-            height: 48,
-            lineHeight: '22px',
-            backgroundSize: '100%',
-            textAlign: 'center',
-            padding: '8px 16px 16px 12px',
-            color: '#FFF',
-            fontWeight: 'bold',
-            backgroundImage:
-              "url('https://gw.alipayobjects.com/zos/bmw-prod/daaf8d50-8e6d-4251-905d-676a24ddfa12.svg')",
-          }}
-        >
-          {index}
-        </div>
-        <div
-          style={{
-            fontSize: '16px',
-            color: token.colorText,
-            paddingBottom: 8,
-          }}
-        >
-          {title}
-        </div>
-      </div>
-      <div
-        style={{
-          fontSize: '14px',
-          color: token.colorTextSecondary,
-          textAlign: 'justify',
-          lineHeight: '22px',
-          marginBottom: 8,
-        }}
-      >
-        {desc}
-      </div>
-      <a href={href} target="_blank" rel="noreferrer">
-        了解更多 {'>'}
-      </a>
-    </div>
-  );
-};
+function handleEditorChange({ html, text }: { html: string; text: string }) {
+  console.log('handleEditorChange', html, text);
+}
 
 const Welcome: React.FC = () => {
-  const { token } = theme.useToken();
   const { initialState } = useModel('@@initialState');
+  const [drawerVisit, setDrawerVisit] = useState(false);
+  const [form] = Form.useForm<{ name: string; company: string }>();
+  const [fileList, setFileList] = useState<UploadFile[]>();
+  const [previewImage, setPreviewImage] = useState('');
+  const [previewTitle, setPreviewTitle] = useState('');
+  const [previewOpen, setPreviewOpen] = useState(false);
+
+  const onTagFinish = (value: any) => {
+    if (value.length > 2) {
+      value.pop();
+      message.warning("最多只能选择2个标签");
+    }
+  };
+
+  const getBase64 = (file: RcFile): Promise<string> =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = (error) => reject(error);
+    });
+
+  const handleCancel = () => setPreviewOpen(false);
+
+  const handleChange: UploadProps['onChange'] = ({ fileList: newFileList }) =>
+    setFileList(newFileList);
+
+  const handlePreview = async (file: UploadFile) => {
+    if (!file.url && !file.preview) {
+      file.preview = await getBase64(file.originFileObj as RcFile);
+    }
+
+    setPreviewImage(file.url || (file.preview as string));
+    setPreviewOpen(true);
+    setPreviewTitle(file.name || file.url!.substring(file.url!.lastIndexOf('/') + 1));
+  };
+
   return (
     <PageContainer>
       <Card
@@ -104,58 +78,119 @@ const Welcome: React.FC = () => {
             backgroundPosition: '100% -30%',
             backgroundRepeat: 'no-repeat',
             backgroundSize: '274px auto',
-            backgroundImage:
-              "url('https://gw.alipayobjects.com/mdn/rms_a9745b/afts/img/A*BuFmQqsB2iAAAAAAAAAAAAAAARQnAQ')",
           }}
         >
-          <div
-            style={{
-              fontSize: '20px',
-              color: token.colorTextHeading,
-            }}
-          >
-            欢迎使用 Ant Design Pro
-          </div>
-          <p
-            style={{
-              fontSize: '14px',
-              color: token.colorTextSecondary,
-              lineHeight: '22px',
-              marginTop: 16,
-              marginBottom: 32,
-              width: '65%',
-            }}
-          >
-            Ant Design Pro 是一个整合了 umi，Ant Design 和 ProComponents
-            的脚手架方案。致力于在设计规范和基础组件的基础上，继续向上构建，提炼出典型模板/业务组件/配套设计资源，进一步提升企业级中后台产品设计研发过程中的『用户』和『设计者』的体验。
-          </p>
-          <div
-            style={{
-              display: 'flex',
-              flexWrap: 'wrap',
-              gap: 16,
-            }}
-          >
-            <InfoCard
-              index={1}
-              href="https://umijs.org/docs/introduce/introduce"
-              title="了解 umi"
-              desc="umi 是一个可扩展的企业级前端应用框架,umi 以路由为基础的，同时支持配置式路由和约定式路由，保证路由的功能完备，并以此进行功能扩展。"
-            />
-            <InfoCard
-              index={2}
-              title="了解 ant design"
-              href="https://ant.design"
-              desc="antd 是基于 Ant Design 设计体系的 React UI 组件库，主要用于研发企业级中后台产品。"
-            />
-            <InfoCard
-              index={3}
-              title="了解 Pro Components"
-              href="https://procomponents.ant.design"
-              desc="ProComponents 是一个基于 Ant Design 做了更高抽象的模板组件，以 一个组件就是一个页面为开发理念，为中后台开发带来更好的体验。"
-            />
-          </div>
+          <Form layout={'inline'}>
+            <Form.Item
+              label="输入标题"
+              style={{ width: '76%' }}
+              name="title"
+              rules={[{ required: true, message: '标题为必填项' }]}
+            >
+              <Input placeholder="在此输入标题" />
+            </Form.Item>
+            <Form.Item>
+              <Button htmlType="submit">
+                <CloudUploadOutlined />
+                草稿箱
+              </Button>
+            </Form.Item>
+            <Form.Item>
+              <Button
+                type="primary"
+                onClick={() => {
+                  setDrawerVisit(true);
+                }}
+              >
+                <SendOutlined />
+                发布
+              </Button>
+            </Form.Item>
+          </Form>
         </div>
+        <br />
+        <MdEditor
+          style={{ height: '500px' }}
+          renderHTML={(text) => mdParser.render(text)}
+          onChange={handleEditorChange}
+        />
+        <DrawerForm<{
+          name: string;
+          company: string;
+        }>
+          title="发布文章"
+          width={500}
+          form={form}
+          onOpenChange={setDrawerVisit}
+          open={drawerVisit}
+          autoFocusFirstInput
+          drawerProps={{
+            destroyOnClose: true,
+          }}
+          submitTimeout={2000}
+          onFinish={async (values) => {
+            console.log(values.name);
+            message.success('提交成功');
+            return true;
+          }}
+        >
+          <ProFormSelect
+            name="select"
+            label="文章分类"
+            valueEnum={{
+              china: 'China',
+              usa: 'U.S.A',
+            }}
+            placeholder="选择文章分类"
+            rules={[{ required: true, message: '请选择一个文章分类' }]}
+          />
+          <ProFormSelect
+            name="select-multiple"
+            label="添加标签"
+            valueEnum={{
+              red: 'Red',
+              green: 'Green',
+              blue: 'Blue',
+            }}
+            fieldProps={{
+              mode: 'multiple',
+              maxTagCount:2,
+              onChange:onTagFinish
+            }}
+            placeholder="请添加标签"
+            rules={[
+              { required: true, message: '请至少添加一个标签', type: 'array' },
+            ]}
+          />
+          <ProFormUploadDragger
+            name="drag-pic"
+            label="文章封面"
+            title="请上传一张封面，多余的图片将会被覆盖"
+            description="建议尺寸：1303*734px"
+            fieldProps={{
+              listType:"picture-card",
+              fileList: fileList,
+              onPreview:handlePreview,
+              onChange:handleChange,
+              maxCount:1
+            }}
+          />
+          <Modal open={previewOpen} title={previewTitle} footer={null} onCancel={handleCancel}>
+            <img alt="example" style={{ width: '100%' }} src={previewImage} />
+          </Modal>
+          <ProFormTextArea
+            fieldProps={{
+              maxLength: 100,
+              showCount: true
+            }}
+            name="text"
+            label="编辑摘要"
+            placeholder="请编辑文章摘要"
+            rules={[
+              { required: true, message: '请填写文章摘要' },
+            ]}
+          />
+        </DrawerForm>
       </Card>
     </PageContainer>
   );
