@@ -1,6 +1,6 @@
 export default {
   'menu.welcome': '欢迎',
-  'menu.writing' : '开始创作',
+  'menu.writing' : '编辑文章',
   'menu.more-blocks': '更多区块',
   'menu.home': '首页',
   'menu.admin': '管理页',
