@@ -9,6 +9,19 @@ import { Alert, message, Tabs } from 'antd';
 import React, { useState } from 'react';
 import Settings from '../../../../config/defaultSettings';
 
+import JSEncrypt from 'jsencrypt';
+
+const PUB_KEY =
+  'MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCBOzCpdkNjG2gQd+V/LqDbiMp+dd86SucxxlTmGhX8+couJfXydXJ5UkROkHFRtIPIV6CrrEJQkte/scGFIzic+hQWWl2g5UgV0i+Eqm2X6zUHuOOv3VOMlPOK0OAUOLiuqTS/Z212XLY3I2hG/MOLpKF3S36rVlMqP+FUMp4w6QIDAQAB';
+
+// 公钥加密
+function encrypt(text: string) {
+  const encrypt = new JSEncrypt();
+  encrypt.setPublicKey(PUB_KEY);
+  const encrypted: string = encrypt.encrypt(text).toString();
+  return encrypted;
+}
+
 const Lang = () => {
   const langClassName = useEmotionCss(({ token }) => {
     return {
@@ -69,7 +82,8 @@ const Login: React.FC = () => {
     try {
       // 登录
       const res = await userLoginUsingPOST({
-        ...values,
+        userAccount: encrypt(values.userAccount as string),
+        userPassword: encrypt(values.userPassword as string),
       });
       if (res.data) {
         const urlParams = new URL(window.location.href).searchParams;
