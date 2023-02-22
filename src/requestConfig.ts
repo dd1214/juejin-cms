@@ -25,7 +25,7 @@ interface ResponseStructure {
  * @doc https://umijs.org/docs/max/request#配置
  */
 export const requestConfig: RequestConfig = {
-  baseURL: 'http://jj.hanbing777.top',
+  baseURL: 'https://jj.hanbing777.top',
   withCredentials: true,
   errorConfig: {
     // 错误抛出
