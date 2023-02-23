@@ -12,6 +12,7 @@ import {Avatar, Button, Drawer, message, Modal, Space, Tag} from 'antd';
 import MarkdownIt from 'markdown-it';
 import React, { useRef, useState } from 'react';
 import MdEditor from 'react-markdown-editor-lite';
+import {Link} from "@umijs/renderer-react";
 const mdParser = new MarkdownIt(/* Markdown-it options */);
 
 
@@ -144,7 +145,7 @@ const TableList: React.FC = () => {
         >
           查看
         </a>,
-        <a key="editable">编辑</a>,
+        <Link key="edit" to={"/article/edit?id=" + entity.articleID}>编辑</Link>,
         <a key="delete"
            onClick={() => {
             showModal(entity.articleID as string)

@@ -57,7 +57,7 @@ const AvatarLogo = () => {
   });
 
   return (
-    <Avatar size="small" className={avatarClassName} src={loginUser?.useravatar} alt="avatar" />
+    <Avatar size="small" className={avatarClassName} src={loginUser?.avatar} alt="avatar" />
   );
 };
 
@@ -66,6 +66,7 @@ const AvatarDropdown: React.FC<GlobalHeaderRightProps> = ({ menu }) => {
    * 退出登录，并且将当前的 url 保存
    */
   const loginOut = async () => {
+    sessionStorage.removeItem('isReloaded');
     await userLogoutUsingPOST();
     const { search, pathname } = window.location;
     const urlParams = new URL(window.location.href).searchParams;

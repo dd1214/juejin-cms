@@ -6,33 +6,48 @@ import { InitialState } from '@/typings';
 import type { Settings as LayoutSettings } from '@ant-design/pro-components';
 import { SettingDrawer } from '@ant-design/pro-components';
 import type { RunTimeLayoutConfig } from '@umijs/max';
-import { history } from '@umijs/max';
+import {history} from '@umijs/max';
 import defaultSettings from '../config/defaultSettings';
 const loginPath = '/user/login';
 
 /**
  * @see  https://umijs.org/zh-CN/plugins/plugin-initial-state
  * */
-export async function getInitialState(): Promise<InitialState> {
-  const state: InitialState = {
-    loginUser: undefined,
+export async function getInitialState():Promise<InitialState>{
+
+ const initialState:InitialState = {
+    loginUser:undefined,
     settings: defaultSettings as Partial<LayoutSettings>,
-  };
-  //页面首次加载，获取要全局保存的数据
-  try {
-    const res = await currentUserUsingGET();
-    console.log(res);
-    if (res.data) {
-      state.loginUser = res.data;
-    }
-  } catch (error) {
-    history.push(loginPath);
   }
 
-  return state;
+  Promise.all([
+   await currentUserUsingGET()
+  ]).then((res) => {
+    if (res[0].data) {
+      Object.assign(initialState, {
+        loginUser:res[0].data,
+        settings: defaultSettings,
+      });
+    }else {
+      history.push(loginPath);
+    }
+  });
+
+  return initialState;
+}
+export function onRouteChange(location:any) {
+  // 获取当前的路由路径
+  const { pathname } = location;
+  console.log(pathname)
+  // 判断是否是 /home 页面
+  if (pathname === `/article/edit:*`) {
+    // 执行你的方法
+    console.log('这是 /home 页面');
+  }
 }
 
 // ProLayout 支持的api https://procomponents.ant.design/components/layout
+// @ts-ignore
 export const layout: RunTimeLayoutConfig = ({ initialState, setInitialState }) => {
   return {
     rightContentRender: () => <RightContent />,
@@ -40,10 +55,10 @@ export const layout: RunTimeLayoutConfig = ({ initialState, setInitialState }) =
       content: initialState?.loginUser?.nickname,
     },
     footerRender: () => <Footer />,
-    onPageChange: () => {
+    onPageChange: async () => {
       // 如果没有登录，重定向到 login
       console.log(initialState?.loginUser);
-      if (!initialState?.loginUser && location.pathname !== loginPath) {
+      if (!initialState && location.pathname !== loginPath) {
         history.push(loginPath);
       }
     },
