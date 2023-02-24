@@ -41,10 +41,17 @@ export default [
     component: './ArticleList',
   },
   {
-    name: '全局概览',
+    name: '全局设置',
     icon: 'dotChartOutlined',
     path: '/global',
     component: './GlobalOverview',
+  },
+  {
+    name: '编辑文章',
+    icon: 'dotChartOutlined',
+    path: '/article/edit',
+    layout: false,
+    component: './ArticleEdit',
   },
   {
     path: '/',
