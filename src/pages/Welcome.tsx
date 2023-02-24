@@ -16,6 +16,13 @@ import 'react-markdown-editor-lite/lib/index.css';
 import {RcFile} from "antd/es/upload";
 const mdParser = new MarkdownIt(/* Markdown-it options */);
 
+// 使用 sessionStorage 存储一个标志位，判断是否已经刷新过
+if (sessionStorage.getItem("isReloaded") !== "true") {
+  // 如果没有刷新过，就调用 location.reload() 方法
+  window.location.reload();
+  // 设置标志位为 true，表示已经刷新过
+  sessionStorage.setItem("isReloaded", "true");
+}
 
 function handleEditorChange({ html, text }: { html: string; text: string }) {
   console.log('handleEditorChange', html, text);

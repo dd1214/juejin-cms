@@ -1,253 +1,142 @@
-import {currentListArticleUsingPOST, deleteArticleUsingPOST} from '@/services/swagger/articleController';
-import ProCard from '@ant-design/pro-card';
+import type { ProFormInstance } from '@ant-design/pro-components';
 import {
-  ActionType,
-  FooterToolbar,
   PageContainer,
-  ProColumns,
-  ProTable,
+  ProCard,
+  ProForm,
+  ProFormCheckbox,
+  ProFormDatePicker,
+  ProFormDateRangePicker,
+  ProFormSelect,
+  ProFormText,
+  ProFormTextArea,
+  StepsForm,
 } from '@ant-design/pro-components';
-import { FormattedMessage } from '@umijs/max';
-import {Avatar, Button, Drawer, message, Modal, Space, Tag} from 'antd';
-import MarkdownIt from 'markdown-it';
-import React, { useRef, useState } from 'react';
-import MdEditor from 'react-markdown-editor-lite';
-const mdParser = new MarkdownIt(/* Markdown-it options */);
+import { message } from 'antd';
+import { useRef } from 'react';
 
 
-const TableList: React.FC = () => {
-  /**
-   * @en-US Pop-up window of new window
-   * @zh-CN 新建窗口的弹窗
-   *  */
-  const [showDetail, setShowDetail] = useState<boolean>(false);
-  const [currentRow, setCurrentRow] = useState<API.ArticleVO>();
-  const [selectedRowsState, setSelectedRows] = useState<API.ArticleVO[]>([]);
-  const actionRef = useRef<ActionType>();
-  const [articleId,setArticleId] = useState<string>()
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
-  const showModal = (id:string) => {
-    setArticleId(id);
-    setIsModalOpen(true);
-  };
-
-  const handleOk = async () => {
-    const deleteArticle = await deleteArticleUsingPOST({
-      id:articleId
-    })
-    if (deleteArticle){
-      message.success("删除成功！")
-    }
-    setIsModalOpen(false);
-  };
-
-  const handleCancel = () => {
-    setIsModalOpen(false);
-    setArticleId(undefined);
-  };
-
-  const columns: ProColumns<API.ArticleVO>[] = [
-    {
-      dataIndex: 'index',
-      valueType: 'indexBorder',
-      width: 48,
-    },
-    {
-      title: '文章标题',
-      dataIndex: 'title',
-      align: 'center',
-      ellipsis: true,
-      render: (dom) => {
-        return (
-          <Space>
-            <a>{dom}</a>
-          </Space>
-        );
-      },
-    },
-    {
-      title: '作者',
-      dataIndex: 'avatar',
-      valueType: 'avatar',
-      align: 'center',
-      render: (dom, entity) => {
-        return (
-          <Space>
-            <span>{dom}</span>
-            <a>{entity.author}</a>
-          </Space>
-        );
-      },
-    },
-    {
-      title: '标签',
-      dataIndex: 'category',
-      valueType: 'text',
-      align: 'center',
-      onFilter: true,
-      filters: true,
-      render: (_, record) => (
-        <Space>
-          <Tag key={record.category} color={'blue'}>
-            {record.category}
-          </Tag>
-        </Space>
-      ),
-    },
-    {
-      title: '阅读数',
-      sorter: true,
-      dataIndex: 'viewCount',
-      valueType: 'digit',
-      align: 'center',
-      hideInSearch: true,
-    },
-    {
-      title: '点赞数',
-      sorter: true,
-      dataIndex: 'collectCount',
-      valueType: 'digit',
-      align: 'center',
-      hideInSearch: true,
-    },
-    {
-      title: '评论数',
-      sorter: true,
-      dataIndex: 'commentCount',
-      valueType: 'digit',
-      align: 'center',
-      hideInSearch: true,
-    },
-    {
-      title: '状态',
-      dataIndex: 'articleStatus',
-      align: 'center',
-      hideInSearch: true,
-      valueEnum: {
-        2: { text: '已发布', status: 'Success' },
-        0: { text: '草稿箱', status: 'Default' },
-        1: { text: '审核中', status: 'Processing' },
-      },
-    },
-    {
-      title: '操作',
-      valueType: 'option',
-      key: 'option',
-      render: (dom, entity) => [
-        <a
-          key="view"
-          onClick={() => {
-            setCurrentRow(entity);
-            setShowDetail(true);
-          }}
-        >
-          查看
-        </a>,
-        <a key="editable">编辑</a>,
-        <a key="delete"
-           onClick={() => {
-            showModal(entity.articleID as string)
-        }}>
-          删除
-        </a>,
-      ],
-    },
-  ];
+export default () => {
+  const formRef = useRef<ProFormInstance>();
 
   return (
     <PageContainer>
-      <ProTable<API.ArticleVO>
-        headerTitle="文章管理"
-        actionRef={actionRef}
-        rowKey="articleID"
-        search={{
-          labelWidth: 120,
+      <ProCard>
+      <StepsForm<{
+        name: string;
+      }>
+        formRef={formRef}
+        onFinish={async () => {
+          message.success('提交成功');
         }}
-        rowSelection={{
-          onChange: (_, selectedRows) => {
-            setSelectedRows(selectedRows);
+        formProps={{
+          validateMessages: {
+            required: '此项为必填项',
           },
         }}
-        // @ts-ignore
-        request={async (params) => {
-          const result = await currentListArticleUsingPOST({
-            current: params?.current,
-            pageSize: params?.pageSize,
-            articleStatus: -1,
-            sortField: '',
-            sortOrder: '',
-          });
-          if (result.data !== undefined) {
-            return {
-              data: result.data.list,
-              success: true,
-              total: result.data.total,
-            };
-          }
-        }}
-        columns={columns}
-      />
-      {selectedRowsState?.length > 0 && (
-        <FooterToolbar
-          extra={
-            <div>
-              <FormattedMessage id="pages.searchTable.chosen" defaultMessage="Chosen" />{' '}
-              <a style={{ fontWeight: 600 }}>{selectedRowsState.length}</a>{' '}
-              <FormattedMessage id="pages.searchTable.item" defaultMessage="项" />
-            </div>
-          }
-        >
-          <Button type="primary">
-            <FormattedMessage
-              id="pages.searchTable.batchApproval"
-              defaultMessage="Batch approval"
-            />
-          </Button>
-        </FooterToolbar>
-      )}
-      <Modal title="高危操作警告！！！" open={isModalOpen} onOk={handleOk} onCancel={handleCancel}>
-        <p style={{fontSize:16}}>当前正在删除 id 为 {articleId} 的文章，</p>
-        <p style={{fontSize:16 , color:"red"}} >此操作属于高危操作，删除后将无法恢复，请谨慎决定！</p>
-      </Modal>
-      <Drawer
-        width={800}
-        open={showDetail}
-        onClose={() => {
-          setCurrentRow(undefined);
-          setShowDetail(false);
-        }}
-        closable={false}
       >
-        <ProCard split="vertical">
-          {/*左边栏   可扩展目录*/}
-          {/*<ProCard title="左侧详情" colSpan="30%">*/}
-          {/*</ProCard>*/}
-          <ProCard title={currentRow?.title} headerBordered headStyle={{ color: 'red' }}>
-            <div style={{ marginBottom: 20 }}>
-              <Avatar size={32} src={currentRow?.avatar} /> &nbsp; {currentRow?.author}{' '}
-              &nbsp;&nbsp;&nbsp;
-              <Tag color="success">{currentRow?.category}</Tag>
-            </div>
-            <MdEditor
-              value={currentRow?.content}
-              renderHTML={(text) => mdParser.render(text)}
-              readOnly={true}
-              view={{ menu: false, md: false, html: true }}
-              canView={{
-                menu: false,
-                md: false,
-                html: true,
-                both: true,
-                fullScreen: false,
-                hideMenu: false,
-              }}
+        <StepsForm.StepForm<{
+          name: string;
+        }>
+          name="base"
+          title="创建实验"
+          stepProps={{
+            description: '这里填入的都是基本信息',
+          }}
+          onFinish={async () => {
+            console.log(formRef.current?.getFieldsValue());
+            return true;
+          }}
+        >
+          <ProFormText
+            name="name"
+            label="实验名称"
+            width="md"
+            tooltip="最长为 24 位，用于标定的唯一 id"
+            placeholder="请输入名称"
+            rules={[{ required: true }]}
+          />
+          <ProFormDatePicker name="date" label="日期" />
+          <ProFormDateRangePicker name="dateTime" label="时间区间" />
+          <ProFormTextArea name="remark" label="备注" width="lg" placeholder="请输入备注" />
+        </StepsForm.StepForm>
+        <StepsForm.StepForm<{
+          checkbox: string;
+        }>
+          name="checkbox"
+          title="设置参数"
+          stepProps={{
+            description: '这里填入运维参数',
+          }}
+          onFinish={async () => {
+            console.log(formRef.current?.getFieldsValue());
+            return true;
+          }}
+        >
+          <ProFormCheckbox.Group
+            name="checkbox"
+            label="迁移类型"
+            width="lg"
+            options={['结构迁移', '全量迁移', '增量迁移', '全量校验']}
+          />
+          <ProForm.Group>
+            <ProFormText name="dbname" label="业务 DB 用户名" />
+            <ProFormDatePicker name="datetime" label="记录保存时间" width="sm" />
+            <ProFormCheckbox.Group
+              name="checkbox"
+              label="迁移类型"
+              options={['完整 LOB', '不同步 LOB', '受限制 LOB']}
             />
-          </ProCard>
-        </ProCard>
-      </Drawer>
+          </ProForm.Group>
+        </StepsForm.StepForm>
+        <StepsForm.StepForm
+          name="time"
+          title="发布实验"
+          stepProps={{
+            description: '这里填入发布判断',
+          }}
+        >
+          <ProFormCheckbox.Group
+            name="checkbox"
+            label="部署单元"
+            rules={[
+              {
+                required: true,
+              },
+            ]}
+            options={['部署单元1', '部署单元2', '部署单元3']}
+          />
+          <ProFormSelect
+            label="部署分组策略"
+            name="remark"
+            rules={[
+              {
+                required: true,
+              },
+            ]}
+            initialValue="1"
+            options={[
+              {
+                value: '1',
+                label: '策略一',
+              },
+              { value: '2', label: '策略二' },
+            ]}
+          />
+          <ProFormSelect
+            label="Pod 调度策略"
+            name="remark2"
+            initialValue="2"
+            options={[
+              {
+                value: '1',
+                label: '策略一',
+              },
+              { value: '2', label: '策略二' },
+            ]}
+          />
+        </StepsForm.StepForm>
+      </StepsForm>
+    </ProCard>
     </PageContainer>
   );
 };
-
-export default TableList;
