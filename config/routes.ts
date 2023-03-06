@@ -23,6 +23,12 @@ export default [
     ],
   },
   {
+    path: '/globalIndex',
+    name: '数据概览',
+    icon: 'fundOutlined',
+    component: './GlobalPreview',
+  },
+  {
     path: '/welcome',
     name: 'writing',
     icon: 'diffOutlined',

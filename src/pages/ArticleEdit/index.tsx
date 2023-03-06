@@ -8,7 +8,7 @@ import {
 } from '@ant-design/pro-components';
 import {Form, message, Modal, UploadFile, UploadProps} from 'antd';
 import MarkdownIt from 'markdown-it';
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 
 import MdEditor from 'react-markdown-editor-lite';
 import 'react-markdown-editor-lite/lib/index.css';
@@ -29,7 +29,6 @@ function handleEditorChange({ html, text }: { html: string; text: string }) {
 
 const ArticleEdit: React.FC =() => {
   const [fileList, setFileList] = useState<UploadFile[]>();
-  let [form] = Form.useForm()
   let articleId: string | null = "";
   const [article, setArticle] = useState<API.ArticleVO>();
   const [previewImage, setPreviewImage] = useState('');
@@ -39,7 +38,7 @@ const ArticleEdit: React.FC =() => {
   if (params.has("id")) {
     articleId = params.get("id");
   }
-  const  currentArticleById = async () => {
+  const currentArticleById = async () => {
     const articleById = await currentArticleUsingGET({
       id: articleId as string
     })
@@ -48,7 +47,10 @@ const ArticleEdit: React.FC =() => {
     }
   }
 
-  currentArticleById();
+  useEffect(() => {
+    currentArticleById();
+  });
+
 
   const onTagFinish = (value: any) => {
     if (value.length > 2) {
@@ -80,17 +82,20 @@ const ArticleEdit: React.FC =() => {
     setPreviewTitle(file.name || file.url!.substring(file.url!.lastIndexOf('/') + 1));
   };
   return (
+    
     <PageContainer>
       <ProCard split="vertical">
         <ProCard title="文章信息" colSpan="20%">
           <ProForm
             params={{id: '100'}}
             formKey="base-form-use-demo"
-
+            initialValues={{
+              title:article?.title
+            }}
           >
             <ProFormText
               width="md"
-              name="title1"
+              name="title"
               label="文章标题"
               placeholder="请输入标题"
               rules={[{required: true, message: '请输入文章标题'}]}
